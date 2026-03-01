@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>School Admin Pro - Preah Reach Akk Mohessey</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+Khmer:wght@400;700&family=Khmer+OS+Siemreap&family=Khmer+OS+Muol+Light&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+<!-- ========================= LOGIN ========================= -->
+<section id="loginSection" class="d-flex align-items-center justify-content-center min-vh-100 login-bg">
+  <div class="card shadow-lg p-4 rounded-4 login-card">
+    <div class="card-body text-center">
+      <img
+        src="https://blogger.googleusercontent.com/img/a/AVvXsEi33gP-LjadWAMAbW6z8mKj7NUYkZeslEJ4sVFw7WK3o9fQ-JTQFMWEe06xxew4lj7WKpfuk8fadTm5kXo3GSW9jNaQHE8SrCs8_bUFDV8y4TOJ1Zhbu0YKVnWIgL7sTPuEPMrmrtuNqwDPWKHOvy6PStAaSrCz-GpLfsQNyq-BAElq9EI3etjnYsft0Pvo"
+        alt="Logo" class="mb-3" style="width: 80px; height: 80px; object-fit: contain;"
+      />
+
+      <h4 class="fw-bold text-primary mb-1 kh-title">ប្រព័ន្ធគ្រប់គ្រងថវិកាសិស្ស</h4>
+      <p class="text-muted small mb-4">សូមបញ្ចូលព័ត៌មានដើម្បីចូលប្រើប្រាស់</p>
+
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="username" placeholder="Username" />
+        <label><i class="bi bi-person"></i> ឈ្មោះអ្នកប្រើប្រាស់</label>
+      </div>
+
+      <div class="form-floating mb-4">
+        <input type="password" class="form-control" id="password" placeholder="Password" />
+        <label><i class="bi bi-lock"></i> ពាក្យសម្ងាត់</label>
+      </div>
+
+      <button class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm" onclick="login()">
+        <i class="bi bi-box-arrow-in-right"></i> ចូលប្រព័ន្ធ
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= APP ========================= -->
+<div id="mainApp" style="display:none;">
+  <nav class="app-navbar bg-white p-3 shadow-sm d-flex justify-content-between sticky-top no-print">
+    <div class="d-flex align-items-center gap-2">
+      <div class="app-badge"><i class="bi bi-grid-fill"></i></div>
+      <div>
+        <div class="fw-bold text-primary m-0">Dashboard</div>
+        <div class="text-muted small">Preah Reach Akk Mohessey</div>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span id="roleBadge" class="pill pill-user">USER</span>
+      <span id="userBadge" class="pill pill-name"><i class="bi bi-person-circle"></i> -</span>
+
+      <button class="btn btn-sm btn-light" onclick="showSection('dashboard')"><i class="bi bi-house"></i> Home</button>
+      <button class="btn btn-sm btn-light" onclick="showSection('students')"><i class="bi bi-people"></i> Students</button>
+      <button class="btn btn-sm btn-outline-danger" onclick="logout()">
+        <i class="bi bi-box-arrow-left"></i> Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================= DASHBOARD ========================= -->
+  <div id="dashboardSection" class="container-fluid p-3 page-wrap">
+
+    <div class="fb-hero-card mb-3">
+      <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+          <div class="hero-icon"><i class="bi bi-bar-chart-line"></i></div>
+          <div>
+            <div class="hero-title">Overview</div>
+            <div class="hero-sub">សរុបទិន្នន័យ និងចំណូល (20% សាលា / 80% គ្រូ)</div>
+            <div class="hero-meta">
+              <i class="bi bi-cloud-check"></i>
+              Last sync: <span id="lastSyncDashboard">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-dark no-print" onclick="printStudentReportDetailed()">
+            <i class="bi bi-printer"></i> Print Students PDF
+          </button>
+
+          <button class="btn btn-sm btn-outline-success no-print" onclick="exportTeacherPDF()">
+            <i class="bi bi-filetype-pdf"></i> Export Teacher PDF
+          </button>
+
+          <button class="btn btn-sm btn-outline-secondary no-print" onclick="exportTeacherTSV()">
+            <i class="bi bi-download"></i> Export Teacher TSV
+          </button>
+
+          <button class="btn btn-sm btn-outline-primary no-print" onclick="refreshAll()">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="statsRow" class="stats-grid"></div>
+
+    <!-- Teacher Summary (v2: filter + rowsPerPage + pagination + sort) -->
+    <div class="content-box mt-4">
+      <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2 no-print">
+        <h6 class="fw-bold m-0">Teacher Summary</h6>
+
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchTeacher" class="form-control form-control-sm search-input"
+              placeholder="ស្វែងរកឈ្មោះគ្រូ..." />
+          </div>
+
+          <div class="mini-select">
+            <select id="teacherRowsPerPage" class="form-select form-select-sm">
+              <option value="10">10 rows</option>
+              <option value="20" selected>20 rows</option>
+              <option value="50">50 rows</option>
+              <option value="100">100 rows</option>
+            </select>
+          </div>
+
+          <button class="btn btn-sm btn-outline-primary" onclick="applyTeacherView()">
+            <i class="bi bi-funnel"></i> Apply
+          </button>
+
+          <button class="btn btn-sm btn-light" onclick="resetTeacherView()">
+            <i class="bi bi-x-circle"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover mb-0" id="teacherTable">
+          <thead class="table-light">
+            <tr>
+              <th class="sortable" data-key="teacher">គ្រូ <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="gender">ភេទ <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="students">សិស្ស <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="totalFee">តម្លៃសរុប <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="teacher80">៨០% <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="school20">២០% <span class="sort-ind"></span></th>
+            </tr>
+          </thead>
+          <tbody id="teacherBody"></tbody>
+        </table>
+      </div>
+
+      <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2 no-print">
+        <div class="text-muted small" id="teacherPageInfo">-</div>
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-sm btn-light" onclick="teacherPrevPage()"><i class="bi bi-chevron-left"></i></button>
+          <span class="pill" id="teacherPagePill">1</span>
+          <button class="btn btn-sm btn-light" onclick="teacherNextPage()"><i class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= STUDENTS ========================= -->
+  <div id="studentSection" class="container-fluid p-3 page-wrap" style="display:none;">
+    <div class="fb-hero-card mb-3">
+      <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+          <div class="hero-icon"><i class="bi bi-people"></i></div>
+          <div>
+            <div class="hero-title">Students</div>
+            <div class="hero-sub">Filter / Search / Sort / Pagination (User = View only)</div>
+            <div class="hero-meta">
+              <i class="bi bi-cloud-check"></i>
+              Last sync: <span id="lastSyncStudents">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-outline-dark" onclick="printStudentReportDetailed()">
+            <i class="bi bi-printer"></i> Print PDF
+          </button>
+
+          <button class="btn btn-sm btn-outline-secondary" onclick="exportStudentTSV()">
+            <i class="bi bi-download"></i> Export TSV
+          </button>
+
+          <button class="btn btn-sm btn-primary admin-only" onclick="openStudentModal()">
+            <i class="bi bi-plus-lg"></i> Add New
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="studentStatsRow" class="stats-grid"></div>
+
+    <div class="content-box">
+      <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2 no-print">
+        <h5 class="fw-bold m-0">Student Records</h5>
+
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <div class="search-container">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchStudent" class="form-control form-control-sm search-input"
+              placeholder="ស្វែងរកឈ្មោះសិស្ស / គ្រូ..." />
+          </div>
+
+          <div class="mini-select">
+            <select id="studentRowsPerPage" class="form-select form-select-sm">
+              <option value="10">10 rows</option>
+              <option value="20" selected>20 rows</option>
+              <option value="50">50 rows</option>
+              <option value="100">100 rows</option>
+            </select>
+          </div>
+
+          <button class="btn btn-sm btn-outline-primary" onclick="applyStudentFilters()">
+            <i class="bi bi-funnel"></i> Apply
+          </button>
+
+          <button class="btn btn-sm btn-light" onclick="clearStudentFilters()">
+            <i class="bi bi-x-circle"></i> Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters row -->
+      <div class="p-3 border-bottom bg-soft">
+        <div class="row g-2">
+          <div class="col-12 col-md-4">
+            <div class="form-floating">
+              <select id="filterTeacher" class="form-select"></select>
+              <label><i class="bi bi-person-video3"></i> គ្រូ</label>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <div class="form-floating">
+              <select id="filterGrade" class="form-select"></select>
+              <label><i class="bi bi-mortarboard"></i> ថ្នាក់</label>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <div class="form-floating">
+              <select id="filterGender" class="form-select">
+                <option value="ALL">All</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="ប្រុស">ប្រុស</option>
+                <option value="ស្រី">ស្រី</option>
+              </select>
+              <label><i class="bi bi-gender-ambiguous"></i> ភេទ</label>
+            </div>
+          </div>
+
+          <!-- Date range -->
+          <div class="col-6 col-md-3">
+            <div class="form-floating">
+              <input type="date" id="dateFrom" class="form-control" />
+              <label><i class="bi bi-calendar"></i> Date From</label>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <div class="form-floating">
+              <input type="date" id="dateTo" class="form-control" />
+              <label><i class="bi bi-calendar-check"></i> Date To</label>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 d-flex align-items-stretch">
+            <div class="tip-box w-100">
+              <div class="tip-title"><i class="bi bi-lightbulb"></i> Tip</div>
+              <div class="tip-text">Date Filter គណនាតាម Payment Date (column r[8])</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover mb-0" id="studentTable">
+          <thead class="table-light">
+            <tr>
+              <th class="sortable" data-key="name">ឈ្មោះ <span class="sort-ind"></span></th>
+              <th class="sortable d-none d-md-table-cell" data-key="gender">ភេទ <span class="sort-ind"></span></th>
+              <th class="sortable d-none d-md-table-cell" data-key="grade">ថ្នាក់ <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="teacher">គ្រូ <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="fee">តម្លៃ <span class="sort-ind"></span></th>
+              <th class="sortable" data-key="payDate">ថ្ងៃបង់ប្រាក់ <span class="sort-ind"></span></th>
+              <th>សកម្មភាព</th>
+            </tr>
+          </thead>
+          <tbody id="studentBody"></tbody>
+        </table>
+      </div>
+
+      <div id="studentLoading" class="text-center p-5 d-none">
+        <div class="spinner-border text-primary"></div>
+      </div>
+
+      <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2 no-print">
+        <div class="text-muted small" id="studentPageInfo">-</div>
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-sm btn-light" onclick="studentPrevPage()"><i class="bi bi-chevron-left"></i></button>
+          <span class="pill" id="studentPagePill">1</span>
+          <button class="btn btn-sm btn-light" onclick="studentNextPage()"><i class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin-only FAB -->
+  <button id="fabBtn" class="fab-btn no-print admin-only" onclick="openStudentModal()">
+    <i class="bi bi-plus-lg"></i>
+  </button>
+</div>
+
+<!-- ========================= MODAL ========================= -->
+<div class="modal fade" id="studentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="fw-bold" id="modalTitle">បញ្ចូលសិស្សថ្មី</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <div class="form-floating mb-3">
+          <input type="text" id="addStudentName" class="form-control" />
+          <label>ឈ្មោះសិស្ស</label>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <div class="form-floating">
+              <select id="addGender" class="form-select">
+                <option value="Male">ប្រុស</option>
+                <option value="Female">ស្រី</option>
+              </select>
+              <label>ភេទ</label>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-floating">
+              <input type="text" id="addGrade" class="form-control" placeholder="ថ្នាក់" />
+              <label>ថ្នាក់</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-floating mb-3">
+          <select id="addTeacherSelect" class="form-select">
+            <option value="កែមលៀងគា">កែមលៀងគា</option>
+            <option value="ប្រាក់ប្រសើ">ប្រាក់ប្រសើ</option>
+            <option value="ស្រេងស្រីម៉ី">ស្រេងស្រីម៉ី</option>
+            <option value="ថាស្បៃរឿង">ថាស្បៃរឿង</option>
+            <option value="ស្រីសុផានី">ស្រីសុផានី</option>
+            <option value="ណុនផាន់ណី">ណុនផាន់ណី</option>
+            <option value="ហមបញ្ញា">ហមបញ្ញា</option>
+            <option value="សុខទិត្យ">សុខទិត្យ</option>
+            <option value="ត្រុយចន្ថា">ត្រុយចន្ថា</option>
+            <option value="ហេងចាន់សុភា">ហេងចាន់សុភា</option>
+            <option value="ហុងសៀវមួយ">ហុងសៀវមួយ</option>
+            <option value="រីចន្ទស្រីចេន">រីចន្ទស្រីចេន</option>
+            <option value="ឈុំរស្មី">ឈុំរស្មី</option>
+            <option value="គីមសារ៉ាន់">គីមសារ៉ាន់</option>
+            <option value="វែនសុវិន">វែនសុវិន</option>
+            <option value="យ៉ែមសំណាង">យ៉ែមសំណាង</option>
+            <option value="ភឺនសុទ្ធវិសិដ្ឋ">ភឺនសុទ្ធវិសិដ្ឋ</option>
+            <option value="នីសុដាវីន">នីសុដាវីន</option>
+            <option value="វាសនាសុជាតា">វាសនាសុជាតា</option>
+            <option value="សំរិតដាវីត">សំរិតដាវីត</option>
+            <option value="មីចាន់រី">មីចាន់រី</option>
+            <option value="ឈិនសុពណ៍នរាយ">ឈិនសុពណ៍នរាយ</option>
+            <option value="ហៀងសោភ័ណ">ហៀងសោភ័ណ</option>
+            <option value="ចេងចាន់កាក់">ចេងចាន់កាក់</option>
+            <option value="ស៊ីមធានី">ស៊ីមធានី</option>
+            <option value="ចក់គាអន">ចក់គាអន</option>
+            <option value="គាម្នីរ័ត្ន">គាម្នីរ័ត្ន</option>
+            <option value="ឃឹមថាវុទ្ធ">ឃឹមថាវុទ្ធ</option>
+            <option value="សុខុមស្រីកា">សុខុមស្រីកា</option>
+            <option value="គឺគុន្នី">គឺគុន្នី</option>
+            <option value="ភឿនសុភក្តី">ភឿនសុភក្តី</option>
+            <option value="សាយផានិត">សាយផានិត</option>
+            <option value="ប៊ុនណៃស្រេង">ប៊ុនណៃស្រេង</option>
+            <option value="យន់ស្រីនិច">យន់ស្រីនិច</option>
+            <option value="លឹមចាន់ថា">លឹមចាន់ថា</option>
+            <option value="អ៊ិតវន្ថា">អ៊ិតវន្ថា</option>
+             
+          </select>
+          <label>ជ្រើសរើសគ្រូ</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="number" id="addFee" class="form-control" />
+          <label>តម្លៃសិក្សា</label>
+        </div>
+
+        <div class="p-3 bg-light rounded mb-3 d-flex justify-content-between">
+          <div>
+            <small class="text-muted d-block">គ្រូ ៨០%</small>
+            <strong id="disp80" class="text-primary">0 ៛</strong>
+          </div>
+          <div>
+            <small class="text-muted d-block">សាលា ២០%</small>
+            <strong id="disp20" class="text-danger">0 ៛</strong>
+          </div>
+        </div>
+
+        <button id="submitBtn" class="btn btn-primary w-100 py-3 fw-bold admin-only" onclick="submitStudent()">
+          រក្សាទុក
+        </button>
+
+        <div class="text-muted small text-center mt-2 user-note d-none">
+          User អាចមើលបានតែប៉ុណ្ណោះ
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
